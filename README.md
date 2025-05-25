@@ -40,3 +40,7 @@ Im `pendel.py`-Skript können Sie verschiedene Parameter anpassen, um das Verhal
 - `retain`: Anzahl der Punkte, die in der Spur der Masse beibehalten werden
 
 Experimentieren Sie mit diesen Werten, um verschiedene Schwingungsarten und Dämpfungseffekte zu beobachten.
+
+## Video-Demonstration
+
+Eine Beispiel-Demonstration der Simulation finden Sie auf [YouTube](https://www.youtube.com/shorts/MSY_UUy0_Ds).

@@ -10,7 +10,7 @@ g = vector(0, -9.81*2, 0)  # Erdbeschleunigung
 c = 0.0                  # Dämpfungskoeffizient (passen Sie diesen Wert an)
 
 # Anfangsbedingungen
-y0 = 0.1                 # Anfangsdehnung gegenüber Ruhelage (kleiner Wert, um Schwingung zu ermöglichen)
+y0 = 0.5                 # Anfangsdehnung gegenüber Ruhelage (kleiner Wert, um Schwingung zu ermöglichen)
 x0 = 0.5                 # Anfangsauslenkung nach rechts (für Pendelbewegung)
 z0 = 0.3                 # Anfangsauslenkung nach vorne/hinten (für 3D-Pendelbewegung)
 
