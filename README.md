@@ -1,6 +1,7 @@
 # Masse-Feder-Simulation
 
 Dieses Projekt simuliert die Bewegung einer Masse, die an einer Feder befestigt ist, unter Berücksichtigung von Gravitation und Dämpfung. Die Simulation verwendet die VPython-Bibliothek zur 3D-Visualisierung.
+
 <p align="right" style="float: right; margin-left: 20px;">
     <a href="https://www.youtube.com/shorts/MSY_UUy0_Ds">
         <img src="pendel.jpg" alt="Masse-Feder-Simulation" width="250">
@@ -11,13 +12,14 @@ Der Screenshot rechts zeigt die 3D-Visualisierung der Masse-Feder-Simulation. Kl
 
 ## Projektstruktur
 
-- `pendel.py`: Enthält den gesamten Code für die Masse-Feder-Simulation. Hier werden die physikalischen Parameter definiert, die Szene erstellt und die Bewegung der Masse berechnet und visualisiert.
-
+- `pendel.py`: Enthält den gesamten Code für die Masse-Feder-Simulation. Hier werden die physikalischen Parameter definiert,
+-  die Szene erstellt und die Bewegung der Masse berechnet und visualisiert.
+ 
 ## Anforderungen
 
 Um diese Simulation auszuführen, benötigen Sie Python sowie die VPython-Bibliothek. Sie können VPython mit pip installieren:
 
-```
+```shell
 pip install vpython
 ```
 
