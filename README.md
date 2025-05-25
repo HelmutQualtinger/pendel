@@ -1,6 +1,13 @@
 # Masse-Feder-Simulation
 
 Dieses Projekt simuliert die Bewegung einer Masse, die an einer Feder befestigt ist, unter Berücksichtigung von Gravitation und Dämpfung. Die Simulation verwendet die VPython-Bibliothek zur 3D-Visualisierung.
+<p align="right" style="float: right; margin-left: 20px;">
+    <a href="https://www.youtube.com/shorts/MSY_UUy0_Ds">
+        <img src="pendel.jpg" alt="Masse-Feder-Simulation" width="250">
+    </a>
+</p>
+
+Der Screenshot rechts zeigt die 3D-Visualisierung der Masse-Feder-Simulation. Klicken Sie auf das Bild, um eine kurze Video-Demonstration auf YouTube zu sehen.
 
 ## Projektstruktur
 
@@ -44,3 +51,7 @@ Experimentieren Sie mit diesen Werten, um verschiedene Schwingungsarten und Däm
 ## Video-Demonstration
 
 Eine Beispiel-Demonstration der Simulation finden Sie auf [YouTube](https://www.youtube.com/shorts/MSY_UUy0_Ds).
+
+## Screenshot
+
+[![Masse-Feder-Simulation](pendel.jpg)](https://www.youtube.com/shorts/MSY_UUy0_Ds)
