@@ -11,6 +11,34 @@ c = 0.0                  # Dämpfungskoeffizient (passen Sie diesen Wert an)
 
 # Anfangsbedingungen
 y0 = 0.5                 # Anfangsdehnung gegenüber Ruhelage (kleiner Wert, um Schwingung zu ermöglichen)
+
+def rk4_step(pos, v, dt):
+    # pos, v: vector
+    def acceleration(pos, v):
+        spring_axis = pos - ceiling.pos
+        L = mag(spring_axis)
+        stretch = L - L0
+        F_spring = -k * stretch * norm(spring_axis)
+        F_gravity = m * g
+        F_damping = -c * v
+        F_net = F_spring + F_gravity + F_damping
+        return F_net / m
+
+    k1_v = acceleration(pos, v) * dt
+    k1_x = v * dt
+
+    k2_v = acceleration(pos + 0.5 * k1_x, v + 0.5 * k1_v) * dt
+    k2_x = (v + 0.5 * k1_v) * dt
+
+    k3_v = acceleration(pos + 0.5 * k2_x, v + 0.5 * k2_v) * dt
+    k3_x = (v + 0.5 * k2_v) * dt
+
+    k4_v = acceleration(pos + k3_x, v + k3_v) * dt
+    k4_x = (v + k3_v) * dt
+
+    new_pos = pos + (k1_x + 2*k2_x + 2*k3_x + k4_x) / 6
+    new_v = v + (k1_v + 2*k2_v + 2*k3_v + k4_v) / 6
+    return new_pos, new_v
 x0 = 0.5                 # Anfangsauslenkung nach rechts (für Pendelbewegung)
 z0 = 0.3                 # Anfangsauslenkung nach vorne/hinten (für 3D-Pendelbewegung)
 
