@@ -55,5 +55,35 @@ Experimentieren Sie mit diesen Werten, um verschiedene Schwingungsarten und Däm
 Eine Beispiel-Demonstration der Simulation finden Sie auf [YouTube](https://www.youtube.com/shorts/MSY_UUy0_Ds).
 
 ## Screenshot
+<p align="right" style="float: right; margin-left: 20px;">
+    <a href="https://www.youtube.com/shorts/MSY_UUy0_Ds">
+        <img src="pendel.jpg" alt="Masse-Feder-Simulation" width="250">
+    </a>
+</p>
+Der Screenshot rechts zeigt die 3D-Visualisierung der Masse-Feder-Simulation. Klicken Sie auf das Bild, um eine kurze Video-Demonstration auf YouTube zu sehen.
 
-[![Masse-Feder-Simulation](pendel.jpg)](https://www.youtube.com/shorts/MSY_UUy0_Ds)
+## HTML-Version
+
+Neben der Python-Implementation ist auch eine eigenständige HTML/JavaScript-Version der Simulation verfügbar.
+
+### pendel.html
+
+Die HTML-Version verwendet Three.js zur 3D-Visualisierung und implementiert das gleiche physikalische Modell wie die Python-Version, jedoch mit diesen zusätzlichen Funktionen:
+
+- Keine Installation erforderlich - läuft in jedem modernen Webbrowser
+- Interaktive Steuerelemente für Dämpfung und Federkonstante
+- Möglichkeit, die Masse anzuschupsen (durch Klicken oder Tasten)
+- Einstellbare Schubstärke für dynamische Interaktionen
+
+### Ausführung der HTML-Version
+
+Um die HTML-Version auszuführen, öffnen Sie einfach die Datei `pendel.html` in einem Webbrowser:
+
+```shell
+# Unter macOS
+open pendel.html
+
+# Alternativ mit einem bestimmten Browser
+firefox pendel.html
+chrome pendel.html
+```

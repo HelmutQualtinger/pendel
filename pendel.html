@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Federpendel-Simulation</title>
+    <!-- Laden Sie die Skripte in der richtigen Reihenfolge vor dem Hauptcode -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: rgba(0,0,0,0.7);
+            border-radius: 5px;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            background-color: rgba(0,0,0,0.7);
+            border-radius: 5px;
+        }
+        label, button {
+            display: block;
+            margin: 5px 0;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h2>Federpendel-Simulation</h2>
+        <p>Eine Simulation eines Masse-Feder-Systems mit dem Runge-Kutta-Verfahren 4. Ordnung</p>
+    </div>
+    <div id="controls">
+        <label>Dämpfung: <span id="dampingValue">0.0</span>
+            <input type="range" id="dampingSlider" min="0" max="2" step="0.1" value="0">
+        </label>
+        <label>Federkonstante: <span id="springConstantValue">10</span>
+            <input type="range" id="springConstantSlider" min="1" max="50" step="1" value="10">
+        </label>
+        <button id="resetButton">Zurücksetzen</button>
+    </div>
+    <div id="pushControls" style="position: absolute; bottom: 10px; left: 10px; padding: 10px; background-color: rgba(0,0,0,0.7); border-radius: 5px;">
+        <p>Klicke auf die Masse, um sie anzuschupsen, oder verwende die Tasten:</p>
+        <div style="display: flex; justify-content: center;">
+            <button id="pushLeft">⬅️</button>
+            <button id="pushUp">⬆️</button>
+            <button id="pushDown">⬇️</button>
+            <button id="pushRight">➡️</button>
+            <button id="pushForward">↗️</button>
+            <button id="pushBackward">↘️</button>
+        </div>
+        <label>Schubstärke: <span id="pushStrengthValue">5.0</span>
+            <input type="range" id="pushStrengthSlider" min="1" max="20" step="1" value="5">
+        </label>
+    </div>
+    
+    <script>
+        // Parameter
+        let m = 0.3;                  // Masse in kg
+        let k = 10;                   // Federkonstante in N/m
+        let L0 = 0.8;                 // Ruhelänge der Feder in m
+        let g = new THREE.Vector3(0, -9.81, 0);  // Erdbeschleunigung
+        let c = 0.0;                  // Dämpfungskoeffizient
+
+        // Anfangsbedingungen
+        let y0 = 0.1;                 // Anfangsdehnung gegenüber Ruhelage
+        let x0 = 0.5;                 // Anfangsauslenkung nach rechts
+        let z0 = 0.3;                 // Anfangsauslenkung nach vorne/hinten
+        
+        // Position und Geschwindigkeit
+        let position = new THREE.Vector3(x0, -L0 - y0, z0);
+        let velocity = new THREE.Vector3(0, 0, 0);
+        
+        // Zeitschritt
+        let dt = 0.001;
+        let trailPoints = [];
+        let maxTrailPoints = 5000;
+
+        // Three.js Setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, -0.5, 2);
+        camera.lookAt(0, -0.5, 0);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // OrbitControls für Kamerabewegung
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.target.set(0, -0.5, 0);
+        controls.update();
+
+        // Licht
+        const ambientLight = new THREE.AmbientLight(0x404040, 2.0); // Erhöhte Intensität
+        scene.add(ambientLight);
+        
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
+        mainLight.position.set(1, 1, 2);
+        scene.add(mainLight);
+        
+        const greenLight = new THREE.PointLight(0x00ff00, 1.2, 100);
+        greenLight.position.set(2, 2, -1);
+        scene.add(greenLight);
+
+        // Objekte erstellen
+        // Decke - helleres Material
+        const ceilingGeometry = new THREE.BoxGeometry(0.4, 0.01, 0.4);
+        const ceilingMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff,
+            metalness: 0.3,
+            roughness: 0.4
+        });
+        const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
+        ceiling.position.set(0, 0, 0);
+        scene.add(ceiling);
+        
+        // Masse - helleres Material mit leichtem Glanz
+        const massGeometry = new THREE.SphereGeometry(0.15, 32, 32);
+        const massMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xff0000,
+            metalness: 0.5,
+            roughness: 0.2,
+            emissive: 0x330000 // Leichte Eigenleuchtkraft hinzufügen
+        });
+        const mass = new THREE.Mesh(massGeometry, massMaterial);
+        mass.position.copy(position);
+        scene.add(mass);
+        
+        // Feder (als Linie aus Zylindern)
+        const springGroup = new THREE.Group();
+        scene.add(springGroup);
+        
+        // Aktualisierte Feder-Funktion mit hellerem Material
+        function updateSpring() {
+            // Entferne alte Feder
+            while(springGroup.children.length > 0) {
+                springGroup.remove(springGroup.children[0]);
+            }
+            
+            // Berechne den Vektor von der Decke zur Masse
+            const springVector = new THREE.Vector3().subVectors(mass.position, ceiling.position);
+            const springLength = springVector.length();
+            const springDirection = springVector.clone().normalize();
+            
+            // Erstelle eine Rotationsmatrix, um die Helix in die richtige Richtung zu drehen
+            const startDirection = new THREE.Vector3(0, -1, 0); // Standard ist nach unten
+            const quaternion = new THREE.Quaternion().setFromUnitVectors(startDirection, springDirection);
+            
+            // Erhöhte Parameter für eine feinere Darstellung
+            const segments = 150;             // Mehr Segmente für höhere Auflösung
+            const coils = 50;                 // Mehr Windungen
+            const coilRadius = 0.018;         // Etwas kleinerer Radius für die Windungen
+            const tubeRadius = 0.003;         // Dünnere Röhre für ein feineres Aussehen
+            
+            // Erstelle Spiralpunkte entlang der Achse
+            const points = [];
+            for (let i = 0; i <= segments; i++) {
+                const t = i / segments;
+                const angle = t * Math.PI * 2 * coils; // Mehr Windungen
+                
+                // Erstelle Punkt in lokalen Koordinaten (ungedreht)
+                const localPoint = new THREE.Vector3(
+                    coilRadius * Math.cos(angle),
+                    -springLength * t,
+                    coilRadius * Math.sin(angle)
+                );
+                
+                // Wende Rotation an, um die Helix in die richtige Richtung zu drehen
+                localPoint.applyQuaternion(quaternion);
+                
+                // Verschiebe den Punkt relativ zur Position der Decke
+                points.push(localPoint.add(ceiling.position));
+            }
+            
+            // Erstelle die Kurve und das Röhrengeometrie
+            const curve = new THREE.CatmullRomCurve3(points);
+            // Höhere Werte für tubularSegments und radialSegments für eine glattere Röhre
+            const tubeGeometry = new THREE.TubeGeometry(curve, 200, tubeRadius, 12, false);
+            const tubeMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xaaaaaa,
+                metalness: 0.7,
+                roughness: 0.2,
+                emissive: 0x222222,    // Leichte Eigenleuchtkraft für bessere Sichtbarkeit
+                emissiveIntensity: 0.2
+            });
+            
+            const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+            springGroup.add(tube);
+        }
+        
+        updateSpring();
+        
+        // Trail
+        const trailGeometry = new THREE.BufferGeometry();
+        const trailMaterial = new THREE.LineBasicMaterial({ 
+            color: 0x4444ff, // Helleres Blau
+            linewidth: 2
+        });
+        const trail = new THREE.Line(trailGeometry, trailMaterial);
+        scene.add(trail);
+        
+        function updateTrail() {
+            if (trailPoints.length > maxTrailPoints) {
+                trailPoints.shift();
+            }
+            
+            const positions = new Float32Array(trailPoints.length * 3);
+            for (let i = 0; i < trailPoints.length; i++) {
+                positions[i * 3] = trailPoints[i].x;
+                positions[i * 3 + 1] = trailPoints[i].y;
+                positions[i * 3 + 2] = trailPoints[i].z;
+            }
+            
+            trailGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            trailGeometry.attributes.position.needsUpdate = true;
+        }
+        
+        // Berechnung der Beschleunigung
+        function getAcceleration(pos, vel) {
+            const springAxis = new THREE.Vector3().subVectors(pos, ceiling.position);
+            const L = springAxis.length();
+            const stretch = L - L0;
+            
+            // Kräfte
+            const springDirection = springAxis.clone().normalize();
+            const F_spring = springDirection.multiplyScalar(-k * stretch);
+            const F_gravity = g.clone().multiplyScalar(m);
+            const F_damping = vel.clone().multiplyScalar(-c);
+            
+            const F_net = new THREE.Vector3().addVectors(F_spring, F_gravity).add(F_damping);
+            return F_net.divideScalar(m);
+        }
+        
+        // Runge-Kutta 4. Ordnung Integration
+        function integrate() {
+            // k1
+            const a1 = getAcceleration(position, velocity);
+            const k1_v = a1.clone().multiplyScalar(dt);
+            const k1_pos = velocity.clone().multiplyScalar(dt);
+            
+            // k2
+            const pos2 = position.clone().add(k1_pos.clone().multiplyScalar(0.5));
+            const v2 = velocity.clone().add(k1_v.clone().multiplyScalar(0.5));
+            const a2 = getAcceleration(pos2, v2);
+            const k2_v = a2.clone().multiplyScalar(dt);
+            const k2_pos = v2.clone().multiplyScalar(dt);
+            
+            // k3
+            const pos3 = position.clone().add(k2_pos.clone().multiplyScalar(0.5));
+            const v3 = velocity.clone().add(k2_v.clone().multiplyScalar(0.5));
+            const a3 = getAcceleration(pos3, v3);
+            const k3_v = a3.clone().multiplyScalar(dt);
+            const k3_pos = v3.clone().multiplyScalar(dt);
+            
+            // k4
+            const pos4 = position.clone().add(k3_pos);
+            const v4 = velocity.clone().add(k3_v);
+            const a4 = getAcceleration(pos4, v4);
+            const k4_v = a4.clone().multiplyScalar(dt);
+            const k4_pos = v4.clone().multiplyScalar(dt);
+            
+            // Update
+            velocity.add(k1_v.add(k2_v.multiplyScalar(2)).add(k3_v.multiplyScalar(2)).add(k4_v).multiplyScalar(1/6));
+            position.add(k1_pos.add(k2_pos.multiplyScalar(2)).add(k3_pos.multiplyScalar(2)).add(k4_pos).multiplyScalar(1/6));
+        }
+        
+        // UI-Steuerungen
+        const dampingSlider = document.getElementById('dampingSlider');
+        const dampingValue = document.getElementById('dampingValue');
+        dampingSlider.addEventListener('input', function() {
+            c = parseFloat(this.value);
+            dampingValue.textContent = c.toFixed(1);
+        });
+        
+        const springConstantSlider = document.getElementById('springConstantSlider');
+        const springConstantValue = document.getElementById('springConstantValue');
+        springConstantSlider.addEventListener('input', function() {
+            k = parseFloat(this.value);
+            springConstantValue.textContent = k.toFixed(0);
+        });
+        
+        const resetButton = document.getElementById('resetButton');
+        resetButton.addEventListener('click', function() {
+            position.set(x0, -L0 - y0, z0);
+            velocity.set(0, 0, 0);
+            trailPoints = [];
+            updateTrail();
+        });
+        
+        // Anschupsen-Funktionalität
+        let pushStrength = 5.0;
+
+        // Raycaster für Klickerkennung
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        // Event-Handler für Mausklick
+        renderer.domElement.addEventListener('click', function(event) {
+            // Mausposition normalisieren (-1 bis +1)
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            // Raycaster aktualisieren
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Prüfen, ob die Masse getroffen wurde
+            const intersects = raycaster.intersectObject(mass);
+            
+            if (intersects.length > 0) {
+                // Richtung vom Kamera zur Masse berechnen
+                const pushDirection = new THREE.Vector3();
+                pushDirection.subVectors(mass.position, camera.position).normalize();
+                
+                // Der Masse einen Impuls in Richtung der Kamera geben
+                velocity.add(pushDirection.multiplyScalar(pushStrength));
+                
+                // Kurze Farbänderung zur Bestätigung
+                const originalColor = massMaterial.color.clone();
+                massMaterial.color.set(0xffff00); // Gelb für einen Moment
+                setTimeout(() => {
+                    massMaterial.color.copy(originalColor);
+                }, 200);
+            }
+        });
+
+        // Tastendruck-Handler für präziseres Anschupsen
+        document.addEventListener('keydown', function(event) {
+            let impulse = new THREE.Vector3(0, 0, 0);
+            
+            switch(event.key) {
+                case 'ArrowLeft':  impulse.x = -pushStrength; break;
+                case 'ArrowRight': impulse.x = pushStrength; break;
+                case 'ArrowUp':    impulse.y = pushStrength; break;
+                case 'ArrowDown':  impulse.y = -pushStrength; break;
+                case 'PageUp':     impulse.z = -pushStrength; break; // nach vorne
+                case 'PageDown':   impulse.z = pushStrength; break;  // nach hinten
+            }
+            
+            if (impulse.length() > 0) {
+                velocity.add(impulse);
+                
+                // Kurze Farbänderung zur Bestätigung
+                const originalColor = massMaterial.color.clone();
+                massMaterial.color.set(0xffff00); // Gelb für einen Moment
+                setTimeout(() => {
+                    massMaterial.color.copy(originalColor);
+                }, 200);
+            }
+        });
+
+        // Button-Handler
+        document.getElementById('pushLeft').addEventListener('click', () => {
+            velocity.add(new THREE.Vector3(-pushStrength, 0, 0));
+        });
+        document.getElementById('pushRight').addEventListener('click', () => {
+            velocity.add(new THREE.Vector3(pushStrength, 0, 0));
+        });
+        document.getElementById('pushUp').addEventListener('click', () => {
+            velocity.add(new THREE.Vector3(0, pushStrength, 0));
+        });
+        document.getElementById('pushDown').addEventListener('click', () => {
+            velocity.add(new THREE.Vector3(0, -pushStrength, 0));
+        });
+        document.getElementById('pushForward').addEventListener('click', () => {
+            velocity.add(new THREE.Vector3(0, 0, -pushStrength));
+        });
+        document.getElementById('pushBackward').addEventListener('click', () => {
+            velocity.add(new THREE.Vector3(0, 0, pushStrength));
+        });
+
+        // Schubstärke-Slider
+        const pushStrengthSlider = document.getElementById('pushStrengthSlider');
+        const pushStrengthValue = document.getElementById('pushStrengthValue');
+        pushStrengthSlider.addEventListener('input', function() {
+            pushStrength = parseFloat(this.value);
+            pushStrengthValue.textContent = pushStrength.toFixed(1);
+        });
+        
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Physik-Update (mehrere Schritte pro Frame für höhere Genauigkeit)
+            const stepsPerFrame = 10;
+            for (let i = 0; i < stepsPerFrame; i++) {
+                integrate();
+            }
+            
+            // Aktualisiere die Position des Masseballs
+            mass.position.copy(position);
+            
+            // Trail aktualisieren
+            trailPoints.push(position.clone());
+            updateTrail();
+            
+            // Feder aktualisieren
+            updateSpring();
+            
+            // Render
+            renderer.render(scene, camera);
+        }
+        
+        // Starte Animation
+        animate();
+        
+        // Fenster-Größenanpassung
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
