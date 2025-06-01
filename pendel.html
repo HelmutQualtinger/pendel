@@ -89,7 +89,7 @@
         // Zeitschritt
         let dt = 0.001;
         let trailPoints = [];
-        let maxTrailPoints = 5000;
+        let maxTrailPoints = 500; // Vorher 5000, jetzt 500 für eine kürzere Spur
 
         // Three.js Setup
         const scene = new THREE.Scene();
@@ -136,7 +136,7 @@
         const massGeometry = new THREE.SphereGeometry(0.15, 32, 32);
         const massMaterial = new THREE.MeshStandardMaterial({ 
             color: 0xff0000,
-            metalness: 0.5,
+            metalness: 0.8,
             roughness: 0.2,
             emissive: 0x330000 // Leichte Eigenleuchtkraft hinzufügen
         });
@@ -165,7 +165,7 @@
             const quaternion = new THREE.Quaternion().setFromUnitVectors(startDirection, springDirection);
             
             // Erhöhte Parameter für eine feinere Darstellung
-            const segments = 150;             // Mehr Segmente für höhere Auflösung
+            const segments = 550;             // Mehr Segmente für höhere Auflösung
             const coils = 50;                 // Mehr Windungen
             const coilRadius = 0.018;         // Etwas kleinerer Radius für die Windungen
             const tubeRadius = 0.003;         // Dünnere Röhre für ein feineres Aussehen
