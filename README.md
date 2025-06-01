@@ -9,7 +9,7 @@ Dieses Projekt simuliert die Bewegung einer Masse, die an einer Feder befestigt 
 </p>
 
 **Projekt-Website:** 
-[https://qualcuno.github.io/info/](https://qualcuno.info/Pendel/)
+
 Online-Demo: [Online-demo](https://qualcuno.info/Pendel/)
 Der Screenshot rechts zeigt die 3D-Visualisierung der Masse-Feder-Simulation. Klicken Sie auf das Bild, um eine kurze Video-Demonstration auf YouTube zu sehen.
 
