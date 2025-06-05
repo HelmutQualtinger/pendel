@@ -30,6 +30,12 @@
             padding: 10px;
             background-color: rgba(0,0,0,0.7);
             border-radius: 5px;
+            display: flex; /* Verwenden Sie Flexbox */
+            flex-direction: column; /* Ordnen Sie die Elemente vertikal an */
+            align-items: flex-start; /* Richten Sie die Elemente links aus */
+        }
+        #controls > div {
+            margin-bottom: 10px; /* Fügen Sie Abstand zwischen den Abschnitten hinzu */
         }
         label, button {
             display: block;
@@ -37,6 +43,24 @@
         }
         input[type="range"] {
             width: 100%;
+        }
+        /* Stil für die Schubsteuerung */
+        #pushControls {
+            padding: 10px;
+            background-color: rgba(0,0,0,0.7);
+            border-radius: 5px;
+            margin-top: 10px; /* Fügen Sie Abstand zum vorherigen Element hinzu */
+        }
+        #pushControls p {
+            margin-bottom: 5px;
+        }
+        #pushControls div {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+        #pushControls button {
+            margin: 0 5px;
         }
     </style>
 </head>
@@ -46,27 +70,31 @@
         <p>Eine Simulation eines Masse-Feder-Systems mit dem Runge-Kutta-Verfahren 4. Ordnung</p>
     </div>
     <div id="controls">
-        <label>Dämpfung: <span id="dampingValue">0.0</span>
-            <input type="range" id="dampingSlider" min="0" max="2" step="0.1" value="0">
-        </label>
-        <label>Federkonstante: <span id="springConstantValue">10</span>
-            <input type="range" id="springConstantSlider" min="1" max="50" step="1" value="10">
-        </label>
-        <button id="resetButton">Zurücksetzen</button>
-    </div>
-    <div id="pushControls" style="position: absolute; bottom: 10px; left: 10px; padding: 10px; background-color: rgba(0,0,0,0.7); border-radius: 5px;">
-        <p>Klicke auf die Masse, um sie anzuschupsen, oder verwende die Tasten:</p>
-        <div style="display: flex; justify-content: center;">
-            <button id="pushLeft">⬅️</button>
-            <button id="pushUp">⬆️</button>
-            <button id="pushDown">⬇️</button>
-            <button id="pushRight">➡️</button>
-            <button id="pushForward">↗️</button>
-            <button id="pushBackward">↘️</button>
+        <div>
+            <label>Dämpfung: <span id="dampingValue">0.0</span>
+                <input type="range" id="dampingSlider" min="0" max="2" step="0.1" value="0">
+            </label>
         </div>
-        <label>Schubstärke: <span id="pushStrengthValue">5.0</span>
-            <input type="range" id="pushStrengthSlider" min="1" max="20" step="1" value="5">
-        </label>
+        <div>
+            <label>Federkonstante: <span id="springConstantValue">10</span>
+                <input type="range" id="springConstantSlider" min="1" max="50" step="1" value="10">
+            </label>
+        </div>
+        <div id="pushControls">
+            <p>Klicke auf die Masse, um sie anzuschupsen, oder verwende die Tasten:</p>
+            <div>
+                <button id="pushLeft">⬅️</button>
+                <button id="pushUp">⬆️</button>
+                <button id="pushDown">⬇️</button>
+                <button id="pushRight">➡️</button>
+                <button id="pushForward">↗️</button>
+                <button id="pushBackward">↘️</button>
+            </div>
+            <label>Schubstärke: <span id="pushStrengthValue">5.0</span>
+                <input type="range" id="pushStrengthSlider" min="1" max="20" step="1" value="5">
+            </label>
+        </div>
+        <button id="resetButton">Zurücksetzen</button>
     </div>
     
     <script>
@@ -165,8 +193,8 @@
             const quaternion = new THREE.Quaternion().setFromUnitVectors(startDirection, springDirection);
             
             // Erhöhte Parameter für eine feinere Darstellung
-            const segments = 550;             // Mehr Segmente für höhere Auflösung
-            const coils = 50;                 // Mehr Windungen
+            const segments = 200;             // Mehr Segmente für höhere Auflösung
+            const coils = 20;                 // Mehr Windungen
             const coilRadius = 0.018;         // Etwas kleinerer Radius für die Windungen
             const tubeRadius = 0.003;         // Dünnere Röhre für ein feineres Aussehen
             
