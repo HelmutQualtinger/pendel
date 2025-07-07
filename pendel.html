@@ -148,13 +148,37 @@
         greenLight.position.set(2, 2, -1);
         scene.add(greenLight);
 
+        // Zusätzliche Lampen für bessere Ausleuchtung
+        const lamp1 = new THREE.PointLight(0xffeeaa, 1.0, 10);
+        lamp1.position.set(2, 2, 2);
+        scene.add(lamp1);
+
+        const lamp2 = new THREE.PointLight(0xaaffee, 0.8, 10);
+        lamp2.position.set(-2, 2, -2);
+        scene.add(lamp2);
+
+        const lamp3 = new THREE.PointLight(0xff8888, 0.7, 10);
+        lamp3.position.set(0, -2, 2);
+        scene.add(lamp3);
+
+        // Optional: kleine sichtbare Kugeln als Lampen anzeigen
+        const lampGeo = new THREE.SphereGeometry(0.04, 16, 16);
+        const lampMat1 = new THREE.MeshBasicMaterial({color: 0xffeeaa});
+        const lampMat2 = new THREE.MeshBasicMaterial({color: 0xaaffee});
+        const lampMat3 = new THREE.MeshBasicMaterial({color: 0xff8888});
+        scene.add(new THREE.Mesh(lampGeo, lampMat1).position.copy(lamp1.position));
+        scene.add(new THREE.Mesh(lampGeo, lampMat2).position.copy(lamp2.position));
+        scene.add(new THREE.Mesh(lampGeo, lampMat3).position.copy(lamp3.position));
+
         // Objekte erstellen
         // Decke - helleres Material
         const ceilingGeometry = new THREE.BoxGeometry(0.4, 0.01, 0.4);
         const ceilingMaterial = new THREE.MeshStandardMaterial({ 
             color: 0xffffff,
             metalness: 0.3,
-            roughness: 0.4
+            roughness: 0.4,
+            transparent: true,
+            opacity: 0.3 // Wert zwischen 0 (unsichtbar) und 1 (voll sichtbar)
         });
         const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
         ceiling.position.set(0, 0, 0);
@@ -226,8 +250,8 @@
                 color: 0xaaaaaa,
                 metalness: 0.7,
                 roughness: 0.2,
-                emissive: 0x222222,    // Leichte Eigenleuchtkraft für bessere Sichtbarkeit
-                emissiveIntensity: 0.2
+                emissive: 0xff8000,         // Kräftiges Orange als Emissionsfarbe
+                emissiveIntensity: 2.0      // Starke Emission
             });
             
             const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);

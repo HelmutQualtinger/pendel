@@ -3,7 +3,7 @@ from vpython import vector, box, sphere, helix, color, scene, wtext, slider, but
 # --- UI Widgets ---
 scene.width = 1400
 scene.height = 800
-scene.title = "Federpendel mit einstellbaren Parametern und Anstupsen"
+scene.title = "Federpendel mit einstellbaren Parrametern und Anstupsen"
 
 # Standardwerte
 m = 0.2
@@ -58,7 +58,7 @@ mass = sphere(pos=vector(x0, -L0 - y0, z0), radius=0.05, color=color.red, make_t
 spring = helix(pos=ceiling.pos, axis=mass.pos - ceiling.pos, radius=0.02, coils=30, thickness=0.01)
 
 v = vector(0, 0, 0)
-dt = 0.002
+dt = 0.004
 
 def rk4_step(pos, v, dt):
     def acceleration(pos, v):
